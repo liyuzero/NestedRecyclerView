@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="nested_recycler_view_inner_recycler_listener" type="id"/>
+</resources>

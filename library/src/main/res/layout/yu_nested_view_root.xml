@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 预加载信息流，防止划出信息流卡顿时。用以容纳信息流View的容器 -->
+    <!--<FrameLayout
+        android:id="@+id/emptyContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"/>
+
+    <com.xiaomi.shop.home.view.type.view.HomeSwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.xiaomi.shop.home.view.type.api.HomeTouchView
+            android:id="@+id/touchView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"/>
+
+        </com.xiaomi.shop.home.view.type.api.HomeTouchView>
+
+    </com.xiaomi.shop.home.view.type.view.HomeSwipeRefreshLayout>
+
+    <FrameLayout
+        android:id="@+id/outTab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"/>-->
+
+</FrameLayout>

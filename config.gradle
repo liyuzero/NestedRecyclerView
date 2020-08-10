@@ -1,0 +1,7 @@
+// gradle配置信息
+ext {
+    COMPILE_SDK_VERSION = 26
+    BUILD_TOOLS_VERSION = "26.0.1"
+    MIN_SDK_VERSION = 14
+    TARGET_SDK_VERSION = 23
+}
