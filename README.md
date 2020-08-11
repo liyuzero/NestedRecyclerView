@@ -19,9 +19,9 @@ NestedRecyclerView
  
 5. 提供底部视图缓存demo，避免滑出ViewPager时卡顿的问题
 
-## 示例
+## 带广告的tab示例
 
-
+![image](https://github.com/liyuzero/NestedRecyclerView/blob/master/demo.gif)
 
 ## 使用方法
 
