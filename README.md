@@ -21,7 +21,7 @@ NestedRecyclerView
 
 ## 带广告的tab示例
 
-![image](https://github.com/liyuzero/NestedRecyclerView/blob/master/demo.gif)
+![demo.gif](https://upload-images.jianshu.io/upload_images/10639439-6c201deae8678aee.gif?imageMogr2/auto-orient/strip)
 
 ## 使用方法
 
