@@ -42,7 +42,7 @@ allprojects {
 2. 使用module依赖，新增依赖：
 
 ```
-implementation 'com.github.liyuzero:NestedRecyclerView:1.0.0'
+ implementation 'com.github.liyuzero:NestedRecyclerView:1.0'
 ```
 
 ### 具体调用（详情见demo）
