@@ -362,7 +362,7 @@ public class NestedRecyclerView extends RecyclerView {
             int initialVelocity = (int) mTracker.getYVelocity();
             if (Math.abs(initialVelocity) > mMinYV) {
                 // 由于坐标轴正方向问题，要加负号。
-                doFling((int) (-initialVelocity * 0.75f));
+                doFling((int) (-initialVelocity));
             }
         }
 
