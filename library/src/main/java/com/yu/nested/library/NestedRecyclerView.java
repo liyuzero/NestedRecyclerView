@@ -24,8 +24,8 @@ public class NestedRecyclerView extends RecyclerView {
     private static final int INVALID_POINTER = -1;
 
     private ChildRecyclerViewHelper mChildRecyclerViewHelper;
-    private HashSet<OnActionListener> mOnActionListeners = new HashSet<>();
-    private HashSet<OnRecyclerScrollListener> mOnScrollListeners = new HashSet<>();
+    private final HashSet<OnActionListener> mOnActionListeners = new HashSet<>();
+    private final HashSet<OnScrollListener> mOnScrollListeners = new HashSet<>();
     private ScrollerManager mScrollerManager;
     private MultiFingerHelper mFingerHelper;
     private boolean mIsMounting; //是否吸顶状态
@@ -33,6 +33,8 @@ public class NestedRecyclerView extends RecyclerView {
 
     private boolean mIsInterceptTouchEvent;
     private boolean mIsScrollUp;
+    //手指是否按下
+    private boolean isTouching;
 
     public NestedRecyclerView(@NonNull Context context) {
         super(context);
@@ -52,7 +54,7 @@ public class NestedRecyclerView extends RecyclerView {
         if (getContext() instanceof Activity) {
             ((Activity) getContext()).findViewById(android.R.id.content);
         }
-        addOnScrollListener(new OnScrollListener() {
+        super.addOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 if (mOnScrollListener != null) {
@@ -72,11 +74,17 @@ public class NestedRecyclerView extends RecyclerView {
     }
 
     @Override
+    public void addOnScrollListener(@NonNull OnScrollListener listener) {
+        mOnScrollListeners.add(listener);
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         mScrollerManager.addMovement(ev);
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                isTouching = true;
                 mFingerHelper.actionDown(ev);
                 mScrollerManager.actionDown();
                 mIsInterceptTouchEvent = false;
@@ -106,10 +114,12 @@ public class NestedRecyclerView extends RecyclerView {
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                isTouching = false;
                 mFingerHelper.activePointerId = INVALID_POINTER;
                 mIsInterceptTouchEvent = mScrollerManager.actionUp() != null;
                 return mIsInterceptTouchEvent || super.dispatchTouchEvent(ev);
             case MotionEvent.ACTION_CANCEL:
+                isTouching = false;
                 mIsInterceptTouchEvent = false;
                 mFingerHelper.activePointerId = INVALID_POINTER;
                 mScrollerManager.abortAnimation();
@@ -130,7 +140,7 @@ public class NestedRecyclerView extends RecyclerView {
     }
 
     private void scrollVer(MotionEvent ev, float offsetY) {
-        if(mIsScrollUp) {
+        if (mIsScrollUp) {
             return;
         }
         if (!(offsetY > 0 && !canScrollVertically(-1))) {
@@ -211,6 +221,13 @@ public class NestedRecyclerView extends RecyclerView {
 
     private void scrollContentView(int scrollY) {
         scrollBy(0, -scrollY);
+        if (mOnScrollListener != null) {
+            if (isTouching && mOnScrollListener.getScrollState() != SCROLL_STATE_DRAGGING) {
+                mOnScrollListener.onScrollStateChanged(this, SCROLL_STATE_DRAGGING);
+            } else if (!isTouching && mOnScrollListener.getScrollState() != SCROLL_STATE_SETTLING) {
+                mOnScrollListener.onScrollStateChanged(this, SCROLL_STATE_SETTLING);
+            }
+        }
     }
 
     private static class MultiFingerHelper {
@@ -362,7 +379,9 @@ public class NestedRecyclerView extends RecyclerView {
             int initialVelocity = (int) mTracker.getYVelocity();
             if (Math.abs(initialVelocity) > mMinYV) {
                 // 由于坐标轴正方向问题，要加负号。
-                doFling((int) (-initialVelocity));
+                doFling(-initialVelocity);
+            } else {
+                mOnScrollListener.onScrollStateChanged(NestedRecyclerView.this, SCROLL_STATE_IDLE);
             }
         }
 
@@ -377,10 +396,16 @@ public class NestedRecyclerView extends RecyclerView {
             boolean finished = !mScroller.computeScrollOffset() || mScroller.isFinished();
             if (!finished) {
                 int offsetY = mScroller.getCurrY() - mPreScrollY;
+                if (offsetY < 0 && !NestedRecyclerView.this.canScrollVertically(-1)) {
+                    //向下滚动，且不能下滑了
+                    mOnScrollListener.onScrollStateChanged(NestedRecyclerView.this, SCROLL_STATE_IDLE);
+                    removeCallbacks(this);
+                }
                 mPreScrollY = mScroller.getCurrY();
                 scrollContent(-offsetY);
                 post(this);
             } else {
+                mOnScrollListener.onScrollStateChanged(NestedRecyclerView.this, SCROLL_STATE_IDLE);
                 removeCallbacks(this);
             }
         }
@@ -440,23 +465,31 @@ public class NestedRecyclerView extends RecyclerView {
         }
     }
 
-    private OnScrollListener mOnScrollListener = new OnScrollListener() {
+    private final OnNestedScrollListener mOnScrollListener = new OnNestedScrollListener();
+
+    private class OnNestedScrollListener extends OnScrollListener {
+        private int mScrollState = -1;
+
+        public int getScrollState() {
+            return mScrollState;
+        }
+
         @Override
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             mScrollerManager.mCurScrollState = ScrollerManager.SCROLL_VER;
-            for (OnRecyclerScrollListener listener : mOnScrollListeners) {
-                listener.onRecyclerScroll(recyclerView, dy, recyclerView != NestedRecyclerView.this);
+            for (OnScrollListener listener : mOnScrollListeners) {
+                listener.onScrolled(recyclerView, 0, dy);
             }
         }
 
         @Override
         public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            mScrollState = newState;
             mScrollerManager.mCurScrollState = ScrollerManager.SCROLL_VER;
+            for (OnScrollListener listener : mOnScrollListeners) {
+                listener.onScrollStateChanged(recyclerView, newState);
+            }
         }
-    };
-
-    public void addOnScrollListener(@NonNull OnRecyclerScrollListener listener) {
-        mOnScrollListeners.add(listener);
     }
 
     public interface OnRecyclerScrollListener {
@@ -535,7 +568,7 @@ public class NestedRecyclerView extends RecyclerView {
                 }
                 notifyLastItemAttacheInfo(true);
                 //缓慢滑动的情况下，会出现内部inner tab栏无法与顶部完全贴合的情况，留下一条缝隙，此处需要手动校准下
-                if (mChildRecyclerViewHelper.getOutTabView() == null) {
+                if (mChildRecyclerViewHelper.getOutTabView() != null && mChildRecyclerViewHelper.getInnerTabView() != null) {
                     //当吸顶栏为 外部写入 的时候没必要校准
                     scrollBy(0, 5);
                 }
