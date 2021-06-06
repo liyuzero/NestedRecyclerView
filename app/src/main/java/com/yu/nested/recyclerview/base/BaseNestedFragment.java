@@ -14,14 +14,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.material.tabs.TabLayout;
 import com.yu.lib.common.ui.BaseFragment;
 import com.yu.lib.common.utils.ToastUtil;
 import com.yu.nested.library.NestedRecyclerView;
+import com.yu.nested.library.manager.NestedLinearLayoutManager;
 import com.yu.nested.recyclerview.R;
 
 import org.jetbrains.annotations.NotNull;
@@ -128,7 +127,7 @@ public abstract class BaseNestedFragment extends BaseFragment {
                 View view = mRootView = inflater.inflate(R.layout.fragment_test, null);
 
                 RecyclerView recyclerView = mRecyclerView = view.findViewById(R.id.recyclerView);
-                recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
+                recyclerView.setLayoutManager(new NestedLinearLayoutManager(recyclerView.getContext()));
                 final List<Object> list = new ArrayList<>();
                 for (int i = 0; i < pageCount; i++) {
                     list.add(" == " + i);

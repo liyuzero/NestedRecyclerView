@@ -6,11 +6,11 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.yu.lib.common.utils.ToastUtil;
 import com.yu.nested.library.NestedRecyclerView;
+import com.yu.nested.library.manager.NestedLinearLayoutManager;
 import com.yu.nested.recyclerview.R;
 import com.yu.nested.recyclerview.base.BaseNestedFragment;
 
@@ -35,7 +35,7 @@ public class PullRefreshFragment extends BaseNestedFragment {
     public void loadView(@NotNull final View view) {
         super.loadView(view);
         mNestedRecyclerView = view.findViewById(R.id.recyclerView);
-        mNestedRecyclerView.setLayoutManager(new LinearLayoutManager(mNestedRecyclerView.getContext()));
+        mNestedRecyclerView.setLayoutManager(new NestedLinearLayoutManager(mNestedRecyclerView.getContext()));
         final List<Object> list = new ArrayList<>();
         for (int i=0; i<40; i++) {
             list.add(" == " + i);
@@ -43,6 +43,8 @@ public class PullRefreshFragment extends BaseNestedFragment {
 
         //如果有数据加载的话，例如信息流，建议提前加载数据，避免卡顿，
         // 至于打点，请自行处理这种预加载数据情况下的 曝光逻辑
+
+        //如果没有特殊要求，此处可以直接修改LayoutManager : getExtraLayoutSpace完成缓存
 
         //构建底部view，如果在onCreateViewHolder内生成并加载数据，滑出viewpager的时候会有明显卡顿，毕竟渲染需要时间，
         //对于复杂底部View，例如常见的信息流卡片，这个卡顿会十分明显，解决卡顿的一个方案就是提前预加载底部ViewPager
